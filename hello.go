@@ -25,7 +25,7 @@ https://docs.aws.amazon.com/ja_jp/aws-cost-management/latest/APIReference/API_Ge
 func main() {
 
 	var profile = flag.String("a", "default", "profile name")
-	var month = flag.Int("m", -1, "how many months back in time")
+	var month = flag.Int("m", 0, "how many months back in time")
 	var dimension = flag.String("g", "LINKED_ACCOUNT", "dimension, one of: AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE")
 	var help = flag.Bool("help", false, "print usage")
 	flag.Parse()
@@ -49,8 +49,16 @@ func queryCost(profile string, month int, groupby string) {
 	svc := costexplorer.NewFromConfig(cfg)
 
 	//// Set the time range for the query to the last 30 days
-	startTime := time.Now().AddDate(0, month, 0)
-	endTime := time.Now()
+
+	now := time.Now()
+	var startTime time.Time
+	if month == 0 {
+		startTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	} else {
+		startTime = now.AddDate(0, month, 0)
+	}
+
+	var endTime = now
 
 	input := &costexplorer.GetCostAndUsageInput{
 		//Filter: &types.Expression{

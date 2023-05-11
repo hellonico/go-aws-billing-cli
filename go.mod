@@ -1,4 +1,4 @@
-module billingapi
+module awscostexplorer
 
 go 1.19
 
