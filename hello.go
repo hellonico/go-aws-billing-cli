@@ -48,8 +48,6 @@ func queryCost(profile string, month int, groupby string) {
 	// Create a CostExplorer client using the loaded AWS credentials and region
 	svc := costexplorer.NewFromConfig(cfg)
 
-	//// Set the time range for the query to the last 30 days
-
 	now := time.Now()
 	var startTime time.Time
 	if month == 0 {
@@ -99,7 +97,6 @@ func queryCost(profile string, month int, groupby string) {
 
 func displayResults(results [][]string) {
 	for _, row := range results {
-		// fmt.Println(row)
 		fmt.Println(strings.Join(row, ","))
 	}
 }
