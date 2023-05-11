@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
-	types "github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
+	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"os"
 	"strings"
 	"time"
@@ -35,10 +35,29 @@ func main() {
 		os.Exit(0)
 	}
 
-	queryCost(*profile, *month, *dimension)
+	QueryCost(*profile, *month, *dimension)
 }
 
-func queryCost(profile string, month int, groupby string) {
+func startDateEndDate(month int) (*string, *string) {
+	now := time.Now()
+	var startTime time.Time
+	if month == 0 {
+		startTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	} else {
+		startTime = now.AddDate(0, month, 0)
+	}
+	var endTime = now
+	return aws.String(startTime.Format("2006-01-02")), aws.String(endTime.Format("2006-01-02"))
+
+}
+
+func displayResults(results [][]string) {
+	for _, row := range results {
+		fmt.Println(strings.Join(row, ","))
+	}
+}
+
+func QueryCost(profile string, month int, groupby string) {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
 
 	if err != nil {
@@ -48,15 +67,7 @@ func queryCost(profile string, month int, groupby string) {
 	// Create a CostExplorer client using the loaded AWS credentials and region
 	svc := costexplorer.NewFromConfig(cfg)
 
-	now := time.Now()
-	var startTime time.Time
-	if month == 0 {
-		startTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	} else {
-		startTime = now.AddDate(0, month, 0)
-	}
-
-	var endTime = now
+	start, end := startDateEndDate(month)
 
 	input := &costexplorer.GetCostAndUsageInput{
 		//Filter: &types.Expression{
@@ -67,8 +78,8 @@ func queryCost(profile string, month int, groupby string) {
 		//},
 		Granularity: types.GranularityMonthly,
 		TimePeriod: &types.DateInterval{
-			Start: aws.String(startTime.Format("2006-01-02")),
-			End:   aws.String(endTime.Format("2006-01-02")),
+			Start: start,
+			End:   end,
 		},
 		Metrics: []string{"UnblendedCost"},
 		GroupBy: []types.GroupDefinition{
@@ -93,10 +104,4 @@ func queryCost(profile string, month int, groupby string) {
 	}
 
 	displayResults(resultsCosts)
-}
-
-func displayResults(results [][]string) {
-	for _, row := range results {
-		fmt.Println(strings.Join(row, ","))
-	}
 }
