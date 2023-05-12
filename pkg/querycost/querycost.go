@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func QueryCost(profile string, start string, end string, groupby string, filter []string, metrics []string) {
+func QueryCost(profile string, start string, end string, granularity types.Granularity, groupby string, filter []string, metrics []string) {
 	if profile == "" {
 		profile = os.Getenv("AWS_PROFILE")
 		if profile == "" {
@@ -25,7 +25,7 @@ func QueryCost(profile string, start string, end string, groupby string, filter 
 		panic("Cannot load aws profile.")
 	}
 
-	input := prepareInput(filter, start, end, metrics, groupby)
+	input := prepareInput(filter, start, end, granularity, metrics, groupby)
 	output := executeQuery(cfg, input)
 	resultsCosts := handleResults(groupby, metrics, output)
 	displayResults(resultsCosts)
@@ -43,7 +43,7 @@ func executeQuery(cfg aws.Config, input *costexplorer.GetCostAndUsageInput) *cos
 	return output
 }
 
-func prepareInput(filter []string, start string, end string, metrics []string, groupby string) *costexplorer.GetCostAndUsageInput {
+func prepareInput(filter []string, start string, end string, granularity types.Granularity, metrics []string, groupby string) *costexplorer.GetCostAndUsageInput {
 	var _filter *types.Expression
 	if len(filter) != 0 {
 		_filter = &types.Expression{
@@ -59,7 +59,7 @@ func prepareInput(filter []string, start string, end string, metrics []string, g
 
 	input := &costexplorer.GetCostAndUsageInput{
 		Filter:      _filter,
-		Granularity: types.GranularityMonthly,
+		Granularity: "MONTHLY",
 		TimePeriod: &types.DateInterval{
 			Start: aws.String(start),
 			End:   aws.String(end),

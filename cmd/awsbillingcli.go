@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/hellonico/go-aws-billing-cli/pkg/querycost"
 	"os"
 	"strings"
@@ -20,6 +21,7 @@ https://docs.aws.amazon.com/ja_jp/aws-cost-management/latest/APIReference/API_Ge
 func main() {
 
 	var profile = flag.String("a", "", "aws profile name")
+	var granularity = flag.String("gr", "MONTHLY", "granularity. one of MONTHLY, DAILY or YEARLY")
 	var month = flag.Int("m", 0, "how many months back in time")
 	var start = flag.String("start", "", "start date. if this is set, month is ignored")
 	var end = flag.String("end", "", "end date")
@@ -39,7 +41,7 @@ func main() {
 
 	startDate, endDate := startDateEndDate(*month, *start, *end)
 
-	querycost.QueryCost(*profile, startDate, endDate, *dimension, filter, metrics)
+	querycost.QueryCost(*profile, startDate, endDate, types.Granularity(*granularity), *dimension, filter, metrics)
 }
 
 func startDateEndDate(month int, start string, end string) (string, string) {
