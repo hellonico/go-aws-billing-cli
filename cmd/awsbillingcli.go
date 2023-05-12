@@ -18,16 +18,17 @@ https://medium.com/@ramonesparza1234/go-aws-costexplorer-a-simple-aws-cost-analy
 https://docs.aws.amazon.com/sdk-for-go/api/service/costexplorer/#CostExplorer.GetCostForecast
 https://docs.aws.amazon.com/ja_jp/aws-cost-management/latest/APIReference/API_GetCostAndUsage.html
 */
+
 func main() {
 
 	var profile = flag.String("a", "", "aws profile name")
-	var granularity = flag.String("gr", "MONTHLY", "granularity. one of MONTHLY, DAILY or YEARLY")
+	var granularity = flag.String("gr", "MONTHLY", "granularity. one of:\nMONTHLY\nDAILY\nYEARLY\n")
 	var month = flag.Int("m", 0, "how many months back in time")
 	var start = flag.String("start", "", "start date. if this is set, month is ignored")
 	var end = flag.String("end", "", "end date")
-	var dimension = flag.String("g", "LINKED_ACCOUNT", "group by dimension, one of: AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE")
-	var _filter = flag.String("f", "", "Filter by services. Use , to separate; one of Amazon Route 53, AmazonCloudWatch, Amazon Route 53...")
-	var _metrics = flag.String("metrics", "UnblendedCost", "Metrics. One or more of: AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity.")
+	var dimension = flag.String("g", "LINKED_ACCOUNT", "group by dimension, one of:\nAZ\nINSTANCE_TYPE\nLEGAL_ENTITY_NAME\nINVOICING_ENTITY\nLINKED_ACCOUNT\nOPERATION\nPLATFORM\nPURCHASE_TYPE\nSERVICE\nTENANCY\nRECORD_TYPE\nUSAGE_TYPE\n")
+	var _filter = flag.String("f", "", "Filter by services. Use , to separate; one or more of (non-exhaustive):\nAWS CloudTrail\nAWS Config\nAWS Cost Explorer\nAWS Directory Service\nAWS Glue\nAWS Key Management Service\nAWS Lambda\nAWS Step Functions\nAWS Support (Developer)\nAmazon Chime\nAmazon Chime Dialin\nAmazon EC2 Container Registry (ECR)\nEC2 - Other\nAmazon Elastic Compute Cloud - Compute\nAmazon Elastic Load Balancing\nAmazon GuardDuty\nAmazon MQ\nAmazon Registrar\nAmazon Relational Database Service\nAmazon Route 53\nAmazon Simple Notification Service\nAmazon Simple Queue Service\nAmazon Simple Storage Service\nAmazon Virtual Private Cloud\nAmazonCloudWatch")
+	var _metrics = flag.String("metrics", "UnblendedCost", "Metrics. One or more of:\nAmortizedCost\nBlendedCost\nNetAmortizedCost\nNetUnblendedCost\nNormalizedUsageAmount\nUnblendedCost\nUsageQuantity\n")
 
 	var help = flag.Bool("help", false, "print usage")
 	flag.Parse()
