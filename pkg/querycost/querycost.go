@@ -7,8 +7,29 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
+	"os"
 	"strings"
 )
+
+func QueryCost(profile string, start string, end string, groupby string, filter []string, metrics []string) {
+	if profile == "" {
+		profile = os.Getenv("AWS_PROFILE")
+		if profile == "" {
+			panic("No profile found. Use either -a or set the AWS_PROFILE environment variable.")
+		}
+	}
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
+
+	if err != nil {
+		panic("Cannot load aws profile.")
+	}
+
+	input := prepareInput(filter, start, end, metrics, groupby)
+	output := executeQuery(cfg, input)
+	resultsCosts := handleResults(groupby, metrics, output)
+	displayResults(resultsCosts)
+}
 
 func displayResults(results [][]string) {
 	for _, row := range results {
@@ -16,15 +37,13 @@ func displayResults(results [][]string) {
 	}
 }
 
-func QueryCost(profile string, start string, end string, groupby string, filter []string, metrics []string) {
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
-
-	if err != nil {
-		panic(err)
-	}
-
+func executeQuery(cfg aws.Config, input *costexplorer.GetCostAndUsageInput) *costexplorer.GetCostAndUsageOutput {
 	svc := costexplorer.NewFromConfig(cfg)
+	output, _ := svc.GetCostAndUsage(context.Background(), input)
+	return output
+}
 
+func prepareInput(filter []string, start string, end string, metrics []string, groupby string) *costexplorer.GetCostAndUsageInput {
 	var _filter *types.Expression
 	if len(filter) != 0 {
 		_filter = &types.Expression{
@@ -53,8 +72,10 @@ func QueryCost(profile string, start string, end string, groupby string, filter 
 			},
 		},
 	}
+	return input
+}
 
-	output, _ := svc.GetCostAndUsage(context.Background(), input)
+func handleResults(groupby string, metrics []string, output *costexplorer.GetCostAndUsageOutput) [][]string {
 	var resultsCosts [][]string
 
 	var headers = []string{"startDate", "endDate", groupby}
@@ -74,6 +95,5 @@ func QueryCost(profile string, start string, end string, groupby string, filter 
 			resultsCosts = append(resultsCosts, info)
 		}
 	}
-
-	displayResults(resultsCosts)
+	return resultsCosts
 }

@@ -19,7 +19,7 @@ https://docs.aws.amazon.com/ja_jp/aws-cost-management/latest/APIReference/API_Ge
 */
 func main() {
 
-	var profile = flag.String("a", "default", "aws profile name")
+	var profile = flag.String("a", "", "aws profile name")
 	var month = flag.Int("m", 0, "how many months back in time")
 	var start = flag.String("start", "", "start date. if this is set, month is ignored")
 	var end = flag.String("end", "", "end date")
