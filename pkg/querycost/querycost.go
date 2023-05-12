@@ -57,13 +57,21 @@ func QueryCost(profile string, start string, end string, groupby string, filter 
 	output, _ := svc.GetCostAndUsage(context.Background(), input)
 	var resultsCosts [][]string
 
+	var headers = []string{"startDate", "endDate", groupby}
+	for _, metric := range metrics {
+		headers = append(headers, metric)
+	}
+	resultsCosts = append(resultsCosts, headers)
+
 	for _, results := range output.ResultsByTime {
 		startDate := *results.TimePeriod.Start
+		endDate := *results.TimePeriod.End
 		for _, groups := range results.Groups {
+			var info = []string{startDate, endDate, groups.Keys[0]}
 			for _, metrics := range groups.Metrics {
-				info := []string{startDate, groups.Keys[0], *metrics.Amount}
-				resultsCosts = append(resultsCosts, info)
+				info = append(info, *metrics.Amount)
 			}
+			resultsCosts = append(resultsCosts, info)
 		}
 	}
 
