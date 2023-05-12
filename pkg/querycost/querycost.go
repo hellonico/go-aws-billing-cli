@@ -8,21 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"strings"
-	"time"
 )
-
-func startDateEndDate(month int) (*string, *string) {
-	now := time.Now()
-	var startTime time.Time
-	if month == 0 {
-		startTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	} else {
-		startTime = now.AddDate(0, month, 0)
-	}
-	var endTime = now
-	return aws.String(startTime.Format("2006-01-02")), aws.String(endTime.Format("2006-01-02"))
-
-}
 
 func displayResults(results [][]string) {
 	for _, row := range results {
@@ -30,7 +16,7 @@ func displayResults(results [][]string) {
 	}
 }
 
-func QueryCost(profile string, month int, groupby string, filter []string, metrics []string) {
+func QueryCost(profile string, start string, end string, groupby string, filter []string, metrics []string) {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
 
 	if err != nil {
@@ -39,8 +25,6 @@ func QueryCost(profile string, month int, groupby string, filter []string, metri
 
 	// Create a CostExplorer client using the loaded AWS credentials and region
 	svc := costexplorer.NewFromConfig(cfg)
-
-	start, end := startDateEndDate(month)
 
 	var _filter *types.Expression
 	if len(filter) != 0 {
@@ -59,8 +43,8 @@ func QueryCost(profile string, month int, groupby string, filter []string, metri
 		Filter:      _filter,
 		Granularity: types.GranularityMonthly,
 		TimePeriod: &types.DateInterval{
-			Start: start,
-			End:   end,
+			Start: aws.String(start),
+			End:   aws.String(end),
 		},
 		Metrics: metrics,
 		GroupBy: []types.GroupDefinition{

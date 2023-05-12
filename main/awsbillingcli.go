@@ -5,6 +5,7 @@ import (
 	"github.com/hellonico/go-aws-billing-cli/pkg/querycost"
 	"os"
 	"strings"
+	"time"
 )
 
 /*
@@ -20,6 +21,8 @@ func main() {
 
 	var profile = flag.String("a", "default", "profile name")
 	var month = flag.Int("m", 0, "how many months back in time")
+	var start = flag.String("start", "", "start date")
+	var end = flag.String("end", "", "end date")
 	var dimension = flag.String("g", "LINKED_ACCOUNT", "dimension, one of: AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE")
 	var _filter = flag.String("f", "", "use , to separate; one of Amazon Route 53, AmazonCloudWatch, Amazon Route 53...")
 	var _metrics = flag.String("metrics", "UnblendedCost", "Default metric is: UnblendedCost")
@@ -34,7 +37,36 @@ func main() {
 		os.Exit(0)
 	}
 
-	querycost.QueryCost(*profile, *month, *dimension, filter, metrics)
+	startDate, endDate := startDateEndDate(*month, *start, *end)
+
+	querycost.QueryCost(*profile, startDate, endDate, *dimension, filter, metrics)
+}
+
+func startDateEndDate(month int, start string, end string) (string, string) {
+	now := time.Now()
+	var startTime time.Time
+	var endTime = now
+
+	if start != "" {
+		startTime, _ = time.Parse("2006-01-02", start)
+		if end != "" {
+			endTime, _ = time.Parse("2006-01-02", end)
+		}
+	} else {
+		if month == 0 {
+			startTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		} else {
+			if month > 0 {
+				startTime = now.AddDate(0, -1*month, 0)
+			} else {
+				startTime = now.AddDate(0, month, 0)
+			}
+
+		}
+	}
+
+	return startTime.Format("2006-01-02"), endTime.Format("2006-01-02")
+
 }
 
 func arrayFromParameter(_filter *string) []string {
