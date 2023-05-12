@@ -21,19 +21,26 @@ func main() {
 	var profile = flag.String("a", "default", "profile name")
 	var month = flag.Int("m", 0, "how many months back in time")
 	var dimension = flag.String("g", "LINKED_ACCOUNT", "dimension, one of: AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE")
-	var _filter = flag.String("f", "", "use , to separate; one of Amazon Route 53, AmazonCloudWatch, Amazon Route 53")
+	var _filter = flag.String("f", "", "use , to separate; one of Amazon Route 53, AmazonCloudWatch, Amazon Route 53...")
+	var _metrics = flag.String("metrics", "UnblendedCost", "Default metric is: UnblendedCost")
 
 	var help = flag.Bool("help", false, "print usage")
 	flag.Parse()
-	var filter = []string{}
-	if *_filter != "" {
-		filter = strings.Split(*_filter, ",")
-	}
+	filter := arrayFromParameter(_filter)
+	metrics := arrayFromParameter(_metrics)
 
 	if *help {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
 
-	querycost.QueryCost(*profile, *month, *dimension, filter)
+	querycost.QueryCost(*profile, *month, *dimension, filter, metrics)
+}
+
+func arrayFromParameter(_filter *string) []string {
+	var filter = []string{}
+	if *_filter != "" {
+		filter = strings.Split(*_filter, ",")
+	}
+	return filter
 }

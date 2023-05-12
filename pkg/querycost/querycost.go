@@ -30,7 +30,7 @@ func displayResults(results [][]string) {
 	}
 }
 
-func QueryCost(profile string, month int, groupby string, filter []string) {
+func QueryCost(profile string, month int, groupby string, filter []string, metrics []string) {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
 
 	if err != nil {
@@ -62,7 +62,7 @@ func QueryCost(profile string, month int, groupby string, filter []string) {
 			Start: start,
 			End:   end,
 		},
-		Metrics: []string{"UnblendedCost"},
+		Metrics: metrics,
 		GroupBy: []types.GroupDefinition{
 			{
 				Type: types.GroupDefinitionTypeDimension,
