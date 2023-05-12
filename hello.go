@@ -27,15 +27,21 @@ func main() {
 	var profile = flag.String("a", "default", "profile name")
 	var month = flag.Int("m", 0, "how many months back in time")
 	var dimension = flag.String("g", "LINKED_ACCOUNT", "dimension, one of: AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE")
+	var _filter = flag.String("f", "", "use , to separate; one of Amazon Route 53, AmazonCloudWatch, Amazon Route 53")
+
 	var help = flag.Bool("help", false, "print usage")
 	flag.Parse()
+	var filter = []string{}
+	if *_filter != "" {
+		filter = strings.Split(*_filter, ",")
+	}
 
 	if *help {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
 
-	QueryCost(*profile, *month, *dimension)
+	QueryCost(*profile, *month, *dimension, filter)
 }
 
 func startDateEndDate(month int) (*string, *string) {
@@ -57,7 +63,7 @@ func displayResults(results [][]string) {
 	}
 }
 
-func QueryCost(profile string, month int, groupby string) {
+func QueryCost(profile string, month int, groupby string, filter []string) {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
 
 	if err != nil {
@@ -69,13 +75,21 @@ func QueryCost(profile string, month int, groupby string) {
 
 	start, end := startDateEndDate(month)
 
+	var _filter *types.Expression
+	if len(filter) != 0 {
+		_filter = &types.Expression{
+			//CostCategories: &types.CostCategoryValues{
+			//
+			//},
+			Dimensions: &types.DimensionValues{
+				Key:    "SERVICE",
+				Values: filter,
+			},
+		}
+	}
+
 	input := &costexplorer.GetCostAndUsageInput{
-		//Filter: &types.Expression{
-		//	CostCategories: &types.CostCategoryValues{
-		//		Key:    aws.String("SERVICE"),
-		//		Values: []string{"Amazon Route 53"},
-		//	},
-		//},
+		Filter:      _filter,
 		Granularity: types.GranularityMonthly,
 		TimePeriod: &types.DateInterval{
 			Start: start,
