@@ -59,7 +59,7 @@ func prepareInput(filter []string, start string, end string, granularity types.G
 
 	input := &costexplorer.GetCostAndUsageInput{
 		Filter:      _filter,
-		Granularity: "MONTHLY",
+		Granularity: granularity,
 		TimePeriod: &types.DateInterval{
 			Start: aws.String(start),
 			End:   aws.String(end),
