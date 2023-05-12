@@ -19,13 +19,13 @@ https://docs.aws.amazon.com/ja_jp/aws-cost-management/latest/APIReference/API_Ge
 */
 func main() {
 
-	var profile = flag.String("a", "default", "profile name")
+	var profile = flag.String("a", "default", "aws profile name")
 	var month = flag.Int("m", 0, "how many months back in time")
-	var start = flag.String("start", "", "start date")
+	var start = flag.String("start", "", "start date. if this is set, month is ignored")
 	var end = flag.String("end", "", "end date")
-	var dimension = flag.String("g", "LINKED_ACCOUNT", "dimension, one of: AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE")
-	var _filter = flag.String("f", "", "use , to separate; one of Amazon Route 53, AmazonCloudWatch, Amazon Route 53...")
-	var _metrics = flag.String("metrics", "UnblendedCost", "Default metric is: UnblendedCost")
+	var dimension = flag.String("g", "LINKED_ACCOUNT", "group by dimension, one of: AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE")
+	var _filter = flag.String("f", "", "Filter by services. Use , to separate; one of Amazon Route 53, AmazonCloudWatch, Amazon Route 53...")
+	var _metrics = flag.String("metrics", "UnblendedCost", "Metrics. Default metric is: UnblendedCost")
 
 	var help = flag.Bool("help", false, "print usage")
 	flag.Parse()
@@ -70,7 +70,7 @@ func startDateEndDate(month int, start string, end string) (string, string) {
 }
 
 func arrayFromParameter(_filter *string) []string {
-	var filter = []string{}
+	var filter []string
 	if *_filter != "" {
 		filter = strings.Split(*_filter, ",")
 	}

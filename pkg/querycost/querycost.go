@@ -23,7 +23,6 @@ func QueryCost(profile string, start string, end string, groupby string, filter 
 		panic(err)
 	}
 
-	// Create a CostExplorer client using the loaded AWS credentials and region
 	svc := costexplorer.NewFromConfig(cfg)
 
 	var _filter *types.Expression
