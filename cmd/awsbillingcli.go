@@ -2,11 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/hellonico/go-aws-billing-cli/pkg/querycost"
 	"os"
-	"strings"
-	"time"
 )
 
 /*
@@ -21,62 +18,23 @@ https://docs.aws.amazon.com/ja_jp/aws-cost-management/latest/APIReference/API_Ge
 
 func main() {
 
-	var profile = flag.String("a", "", "aws profile name")
+	var profile = flag.String("a", "", "aws profile name. can specify multiple")
+	//var script = flag.String("s", "", "repeat query with lines read from a text file")
+	var output = flag.String("o", "", "output. empty for console output")
 	var granularity = flag.String("gr", "MONTHLY", "granularity. one of:\nMONTHLY\nDAILY\nYEARLY\n")
-	var month = flag.Int("m", 0, "how many months back in time")
 	var start = flag.String("start", "", "start date. if this is set, month is ignored")
 	var end = flag.String("end", "", "end date")
 	var dimension = flag.String("g", "LINKED_ACCOUNT", "group by dimension, one of:\nAZ\nINSTANCE_TYPE\nLEGAL_ENTITY_NAME\nINVOICING_ENTITY\nLINKED_ACCOUNT\nOPERATION\nPLATFORM\nPURCHASE_TYPE\nSERVICE\nTENANCY\nRECORD_TYPE\nUSAGE_TYPE\n")
 	var _filter = flag.String("f", "", "Filter by services. Use , to separate; one or more of (non-exhaustive):\nAWS CloudTrail\nAWS Config\nAWS Cost Explorer\nAWS Directory Service\nAWS Glue\nAWS Key Management Service\nAWS Lambda\nAWS Step Functions\nAWS Support (Developer)\nAmazon Chime\nAmazon Chime Dialin\nAmazon EC2 Container Registry (ECR)\nEC2 - Other\nAmazon Elastic Compute Cloud - Compute\nAmazon Elastic Load Balancing\nAmazon GuardDuty\nAmazon MQ\nAmazon Registrar\nAmazon Relational Database Service\nAmazon Route 53\nAmazon Simple Notification Service\nAmazon Simple Queue Service\nAmazon Simple Storage Service\nAmazon Virtual Private Cloud\nAmazonCloudWatch")
-	var _metrics = flag.String("metrics", "UnblendedCost", "Metrics. One or more of:\nAmortizedCost\nBlendedCost\nNetAmortizedCost\nNetUnblendedCost\nNormalizedUsageAmount\nUnblendedCost\nUsageQuantity\n")
+	var _metrics = flag.String("m", "UnblendedCost", "Metrics. One or more of:\nAmortizedCost\nBlendedCost\nNetAmortizedCost\nNetUnblendedCost\nNormalizedUsageAmount\nUnblendedCost\nUsageQuantity\n")
 
 	var help = flag.Bool("help", false, "print usage")
 	flag.Parse()
-	filter := arrayFromParameter(_filter)
-	metrics := arrayFromParameter(_metrics)
 
 	if *help {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
+	querycost.QueryCost(*profile, *start, *end, *granularity, *dimension, *_filter, *_metrics, *output)
 
-	startDate, endDate := startDateEndDate(*month, *start, *end)
-
-	querycost.QueryCost(*profile, startDate, endDate, types.Granularity(*granularity), *dimension, filter, metrics)
-}
-
-func startDateEndDate(month int, start string, end string) (string, string) {
-	now := time.Now()
-	var startTime time.Time
-	var endTime = now
-
-	if end != "" {
-		endTime, _ = time.Parse("2006-01-02", end)
-	}
-
-	if start != "" {
-		startTime, _ = time.Parse("2006-01-02", start)
-	} else {
-		if month == 0 {
-			startTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-		} else {
-			if month > 0 {
-				startTime = now.AddDate(0, -1*month, 0)
-			} else {
-				startTime = now.AddDate(0, month, 0)
-			}
-
-		}
-	}
-
-	return startTime.Format("2006-01-02"), endTime.Format("2006-01-02")
-
-}
-
-func arrayFromParameter(_filter *string) []string {
-	var filter []string
-	if *_filter != "" {
-		filter = strings.Split(*_filter, ",")
-	}
-	return filter
 }
