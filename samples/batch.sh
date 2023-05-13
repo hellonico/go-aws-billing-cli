@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 
-ACCOUNTS="billing nishida"
-SERVICES="LINKED_ACCOUNT SERVICE"
-OUTPUTDIR=output/
+ACCOUNTS=${1:-default}
+DIMENSIONS="AZ LINKED_ACCOUNT SERVICE LEGAL_ENTITY_NAME INVOICING_ENTITY TENANCY OPERATION USAGE_TYPE RECORD_TYPE"
+
+GRANULARITY=${2:-MONTHLY}
+MONTH=${3:-3}
+
+OUTPUTDIR=`echo output/billing_${GRANULARITY}_${MONTH}_months | tr '[:upper:]' '[:lower:]'`
+echo $OUTPUTDIR
+
 rm -fr $OUTPUTDIR
+
 for account in ${ACCOUNTS}; do
-   for service in ${SERVICES}; do 
-      mkdir -p output/${service}
-      # echo $service
-      ./awsbillingcli -o $OUTPUTDIR/${service}/${account}.csv -a ${account} -start 3 -g ${service} 
+   for DIMENSION in ${DIMENSIONS}; do 
+      echo $account ">" $DIMENSION
+      ./awsbillingcli -o $OUTPUTDIR/BYDIMENSION/${DIMENSION}/${account}.csv -a ${account} -gr $GRANULARITY -start $MONTH -g ${DIMENSION} 
+      ./awsbillingcli -o $OUTPUTDIR/BYACCOUNT/${account}/${DIMENSION}.csv -a ${account} -gr $GRANULARITY -start $MONTH -g ${DIMENSION} 
    done
-   # ./awsbillingcli -a ${account} -start 2 -g SERVICE -f "Amazon Elastic Compute Cloud - Compute,EC2 - Other" -o output/${account}
-   # ./awsbillingcli -a ${account} -start 2 -g LINKED_ACCOUNT -f "Amazon Elastic Compute Cloud - Compute,EC2 - Other" -o output/${account}
-   
 done
