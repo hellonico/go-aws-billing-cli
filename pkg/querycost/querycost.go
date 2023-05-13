@@ -36,10 +36,7 @@ func QueryCost(_profile string, _start string, _end string, _granularity string,
 		query := Query{Profile: __profile, StartDate: startDate, EndDate: endDate, Granularity: types.Granularity(_granularity), Dimension: _groupby, Filter: filter, Metrics: metrics}
 		var output Output = StandardOutput{}
 		if _output != "" {
-			if err := os.MkdirAll(_output, os.ModePerm); err != nil {
-				panic(err)
-			}
-			output = CSVOutput{file: _output + "/" + __profile + ".csv"}
+			output = NewCSVOutput(_output)
 		}
 		QueryCostWithQuery(query, output)
 	}

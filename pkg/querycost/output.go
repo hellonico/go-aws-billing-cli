@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -31,4 +32,12 @@ func (s CSVOutput) DisplayResult(res FormattedResult) {
 		f.WriteString(strings.Join(row, ","))
 		f.WriteString("\n")
 	}
+}
+
+func NewCSVOutput(_output string) CSVOutput {
+	parent := filepath.Dir(_output)
+	if err := os.MkdirAll(parent, os.ModePerm); err != nil {
+		panic(err)
+	}
+	return CSVOutput{file: _output}
 }
