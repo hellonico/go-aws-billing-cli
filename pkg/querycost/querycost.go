@@ -76,11 +76,11 @@ func executeQueryWithAWSInput(cfg aws.Config, input *costexplorer.GetCostAndUsag
 	var token = output.NextPageToken
 
 	for token != nil {
-		fmt.Printf("Next Token: %s", token)
+		// fmt.Printf("Next Token: %v\n", *token)
 		input.NextPageToken = token
-		output_bis, _ := svc.GetCostAndUsage(context.Background(), input)
-		output.ResultsByTime = append(output.ResultsByTime, output_bis.ResultsByTime...)
-		token = output_bis.NextPageToken
+		outputBis, _ := svc.GetCostAndUsage(context.Background(), input)
+		output.ResultsByTime = append(output.ResultsByTime, outputBis.ResultsByTime...)
+		token = outputBis.NextPageToken
 	}
 	return output
 }
