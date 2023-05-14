@@ -7,7 +7,7 @@ Easy AWS Cost Query (CLI) in Go
 ```bash
 Usage of ./awsbillingcli:
   -a string
-      aws profile name. can specify multiple. if not specify try to value from env variable AWS_PROFILE.
+      aws profile name(s). if not specified take value from env variable AWS_PROFILE.
   -start string
       start date. can be either a date 2023-01-01, or an integer value for a number of month.
   -end string
