@@ -2,6 +2,7 @@ package querycost
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
@@ -66,7 +67,21 @@ func QueryCostWithQuery(query Query, out Output) {
 
 func executeQueryWithAWSInput(cfg aws.Config, input *costexplorer.GetCostAndUsageInput) *costexplorer.GetCostAndUsageOutput {
 	svc := costexplorer.NewFromConfig(cfg)
-	output, _ := svc.GetCostAndUsage(context.Background(), input)
+
+	output, err := svc.GetCostAndUsage(context.Background(), input)
+	if err != nil {
+		panic(fmt.Sprintf("ERROR [%s] while running query with input: +%v", err, input))
+	}
+
+	var token = output.NextPageToken
+
+	for token != nil {
+		fmt.Printf("Next Token: %s", token)
+		input.NextPageToken = token
+		output_bis, _ := svc.GetCostAndUsage(context.Background(), input)
+		output.ResultsByTime = append(output.ResultsByTime, output_bis.ResultsByTime...)
+		token = output_bis.NextPageToken
+	}
 	return output
 }
 
