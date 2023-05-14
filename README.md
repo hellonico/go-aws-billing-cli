@@ -7,9 +7,13 @@ Easy AWS Cost Query (CLI) in Go
 ```bash
 Usage of ./awsbillingcli:
   -a string
-      aws profile name. can specify multiple
+      aws profile name. can specify multiple. if not specify try to value from env variable AWS_PROFILE.
+  -start string
+      start date. can be either a date 2023-01-01, or an integer value for a number of month.
   -end string
-      end date
+      start date. can be either a date 2023-02-01, or an integer value for a number of month.
+  -ft string
+      Dimension to filter by. (Ex: SERVICE, LINKED_ACCOUNT etc... (default "SERVICE")
   -f string
       Filter by services. Use , to separate; one or more of (non-exhaustive):
       AWS CloudTrail
@@ -58,8 +62,6 @@ Usage of ./awsbillingcli:
       DAILY
       YEARLY
        (default "MONTHLY")
-  -help
-      print usage
   -m string
       Metrics. One or more of:
       AmortizedCost
@@ -71,9 +73,9 @@ Usage of ./awsbillingcli:
       UsageQuantity
        (default "UnblendedCost")
   -o string
-      output. empty for console output
-  -start string
-      start date. 
+      output. empty for console output, or file path
+  -help
+      print usage
 ```
 
 @2023 - hellonico at gmail dot com
