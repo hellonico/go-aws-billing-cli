@@ -22,6 +22,7 @@ func main() {
 	//var script = flag.String("s", "", "repeat query with lines read from a text file")
 	var output = flag.String("o", "", "output. empty for console output")
 	var granularity = flag.String("gr", "MONTHLY", "granularity. one of:\nMONTHLY\nDAILY\nYEARLY\n")
+	var filterType = flag.String("ft", "SERVICE", "Dimension to filter by. (Ex: SERVICE, LINKED_ACCOUNT etc...")
 	var start = flag.String("start", "", "start date. if this is set, month is ignored")
 	var end = flag.String("end", "", "end date")
 	var dimension = flag.String("g", "LINKED_ACCOUNT", "group by dimension, one of:\nAZ\nINSTANCE_TYPE\nLEGAL_ENTITY_NAME\nINVOICING_ENTITY\nLINKED_ACCOUNT\nOPERATION\nPLATFORM\nPURCHASE_TYPE\nSERVICE\nTENANCY\nRECORD_TYPE\nUSAGE_TYPE\n")
@@ -35,6 +36,6 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	querycost.QueryCost(*profile, *start, *end, *granularity, *dimension, *_filter, *_metrics, *output)
+	querycost.QueryCost(*profile, *start, *end, *granularity, *dimension, *_filter, *_metrics, *output, *filterType)
 
 }

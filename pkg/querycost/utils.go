@@ -32,6 +32,9 @@ func parseTime(_time string) string {
 	return res.Format("2006-01-02")
 }
 func startDateEndDate(start string, end string) (string, string) {
+	if start == "" && end == "" {
+		start = "1"
+	}
 	return parseTime(start), parseTime(end)
 }
 

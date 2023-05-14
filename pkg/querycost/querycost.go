@@ -19,6 +19,7 @@ type Query struct {
 	Filter      []string
 	Metrics     []string
 	Output      Output
+	FilterType  string
 }
 
 type Result struct {
@@ -26,15 +27,24 @@ type Result struct {
 	Query  Query
 }
 
-func QueryCost(_profile string, _start string, _end string, _granularity string, _groupby string, _filter string, _metrics string, _output string) {
+func QueryCost(_profile string, _start string, _end string, _granularity string, _groupby string, _filter string, _metrics string, _output string, _filterType string) {
 
 	profiles := arrayFromParameter(_profile)
 	filter := arrayFromParameter(_filter)
 	metrics := arrayFromParameter(_metrics)
 	startDate, endDate := startDateEndDate(_start, _end)
+	filterType := _filterType
+
+	if len(profiles) == 0 {
+		envProfile := os.Getenv("AWS_PROFILE")
+		if envProfile == "" {
+			panic("No profile found. Use either -a or set the AWS_PROFILE environment variable.")
+		}
+		profiles = []string{envProfile}
+	}
 
 	for _, __profile := range profiles {
-		query := Query{Profile: __profile, StartDate: startDate, EndDate: endDate, Granularity: types.Granularity(_granularity), Dimension: _groupby, Filter: filter, Metrics: metrics}
+		query := Query{Profile: __profile, StartDate: startDate, EndDate: endDate, Granularity: types.Granularity(_granularity), Dimension: _groupby, Filter: filter, Metrics: metrics, FilterType: filterType}
 		var output Output = StandardOutput{}
 		if _output != "" {
 			output = NewCSVOutput(_output)
@@ -46,12 +56,6 @@ func QueryCost(_profile string, _start string, _end string, _granularity string,
 
 func QueryCostWithQuery(query Query, out Output) {
 	var profile = query.Profile
-	if query.Profile == "" {
-		profile = os.Getenv("AWS_PROFILE")
-		if profile == "" {
-			panic("No profile found. Use either -a or set the AWS_PROFILE environment variable.")
-		}
-	}
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
 
@@ -59,7 +63,7 @@ func QueryCostWithQuery(query Query, out Output) {
 		panic("Cannot load aws profile.")
 	}
 
-	input := prepareAWSInput(query.Filter, query.StartDate, query.EndDate, query.Granularity, query.Metrics, query.Dimension)
+	input := prepareAWSInput(query)
 	output := executeQueryWithAWSInput(cfg, input)
 	resultsCosts := Result{output, query}
 	out.DisplayResult(SimpleFormatter{}.Format(resultsCosts))
@@ -85,7 +89,16 @@ func executeQueryWithAWSInput(cfg aws.Config, input *costexplorer.GetCostAndUsag
 	return output
 }
 
-func prepareAWSInput(filter []string, start string, end string, granularity types.Granularity, metrics []string, groupby string) *costexplorer.GetCostAndUsageInput {
+func prepareAWSInput(query Query) *costexplorer.GetCostAndUsageInput {
+
+	start := query.StartDate
+	end := query.EndDate
+	granularity := query.Granularity
+	filter := query.Filter
+	filterType := query.FilterType
+	metrics := query.Metrics
+	groupby := query.Dimension
+
 	var _filter *types.Expression
 	if len(filter) != 0 {
 		_filter = &types.Expression{
@@ -93,7 +106,7 @@ func prepareAWSInput(filter []string, start string, end string, granularity type
 			//
 			//},
 			Dimensions: &types.DimensionValues{
-				Key:    "SERVICE",
+				Key:    types.Dimension(filterType),
 				Values: filter,
 			},
 		}
