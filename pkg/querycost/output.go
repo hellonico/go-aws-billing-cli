@@ -51,5 +51,7 @@ func NewArrayOutput(output [][]string) ArrayOutput {
 }
 
 func (a ArrayOutput) DisplayResult(res FormattedResult) {
-	a.Array = res.Value
+	for _, row := range res.Value {
+		a.Array = append(a.Array, row)
+	}
 }
