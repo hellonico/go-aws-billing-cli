@@ -49,3 +49,7 @@ type ArrayOutput struct {
 func NewArrayOutput(output *[][]string) ArrayOutput {
 	return ArrayOutput{Array: output}
 }
+
+func (a ArrayOutput) DisplayResult(res FormattedResult) {
+	a.Array = &res.Value
+}
