@@ -43,13 +43,13 @@ func NewCSVOutput(_output string) CSVOutput {
 }
 
 type ArrayOutput struct {
-	Array *[][]string
+	Array [][]string
 }
 
-func NewArrayOutput(output *[][]string) ArrayOutput {
+func NewArrayOutput(output [][]string) ArrayOutput {
 	return ArrayOutput{Array: output}
 }
 
 func (a ArrayOutput) DisplayResult(res FormattedResult) {
-	a.Array = &res.Value
+	a.Array = res.Value
 }
