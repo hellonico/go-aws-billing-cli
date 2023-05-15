@@ -6,7 +6,7 @@ import (
 )
 
 func TestArray(t *testing.T) {
-	profile := "billing"
+	profile := "kurumaebi"
 	start := "bom"
 	end := ""
 	var resultsCosts = [][]string{}

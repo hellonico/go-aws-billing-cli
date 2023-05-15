@@ -98,7 +98,7 @@ func (s CustomFormatter) Format(res Result) FormattedResult {
 
 				aa, ok := accounts[accountId]
 				if !ok {
-					info = append(info, "")
+					info = append(info, accountId)
 				} else {
 					info = append(info, aa)
 				}
