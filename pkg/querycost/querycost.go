@@ -25,9 +25,12 @@ func NewQuery(_profile string, _start string, _end string, _granularity string, 
 		profiles = []string{envProfile}
 	}
 	var formatter Formatter
-	if _formatter == "alias" {
+	switch _formatter {
+	case "alias":
 		formatter = ReplaceAccountAliasFormatter{}
-	} else {
+	case "custom":
+		formatter = CustomFormatter{}
+	default:
 		formatter = SimpleFormatter{}
 	}
 

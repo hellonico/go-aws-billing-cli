@@ -7,15 +7,28 @@ import (
 )
 
 func parseTime(_time string) string {
-	month, err := strconv.Atoi(_time)
 	now := time.Now()
+
+	month, err := strconv.Atoi(_time)
 	var res time.Time
 	if err != nil {
 		// not an integer so parse as a date
-		if _time == "" {
+		switch _time {
+		case "":
 			// empty date is now
 			res = now
-		} else {
+		case "bom":
+			res = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		case "boy":
+			res = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+		case "eoy":
+			res = time.Date(now.Year(), 12, 31, 23, 59, 0, 0, now.Location())
+		case "bolm":
+			res = time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, now.Location())
+		case "eolm":
+			// .AddDate(0, 0, -1)
+			res = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		default:
 			res, _ = time.Parse("2006-01-02", _time)
 		}
 	} else {
