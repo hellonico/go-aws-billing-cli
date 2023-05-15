@@ -41,3 +41,11 @@ func NewCSVOutput(_output string) CSVOutput {
 	}
 	return CSVOutput{file: _output}
 }
+
+type ArrayOutput struct {
+	Array *[][]string
+}
+
+func NewArrayOutput(output *[][]string) ArrayOutput {
+	return ArrayOutput{Array: output}
+}

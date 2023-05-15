@@ -39,6 +39,6 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	querycost.NewQuery(*profile, *start, *end, *granularity, *dimension, *_filter, *_metrics, *output, *filterType, *_formatter)
+	querycost.NewNewQuery(*profile, *start, *end, *granularity, *dimension, *_filter, *_metrics, *output, *filterType, *_formatter)
 
 }

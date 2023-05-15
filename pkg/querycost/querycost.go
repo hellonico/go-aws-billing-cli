@@ -9,7 +9,17 @@ import (
 	"os"
 )
 
-func NewQuery(_profile string, _start string, _end string, _granularity string, _groupby string, _filter string, _metrics string, _output string, _filterType string, _formatter string) {
+func NewNewQuery(_profile string, _start string, _end string, _granularity string, _groupby string, _filter string, _metrics string, _output string, _filterType string, _formatter string) {
+	var output Output
+	switch _output {
+	case "":
+		output = StandardOutput{}
+	default:
+		output = NewCSVOutput(_output)
+	}
+	NewQuery(_profile, _start, _end, _granularity, _groupby, _filter, _metrics, output, _filterType, _formatter)
+}
+func NewQuery(_profile string, _start string, _end string, _granularity string, _groupby string, _filter string, _metrics string, output Output, _filterType string, _formatter string) {
 
 	profiles := arrayFromParameter(_profile)
 	filter := arrayFromParameter(_filter)
@@ -36,13 +46,8 @@ func NewQuery(_profile string, _start string, _end string, _granularity string, 
 
 	for _, __profile := range profiles {
 		query := Query{Profile: __profile, StartDate: startDate, EndDate: endDate, Granularity: types.Granularity(_granularity), Dimension: _groupby, Filter: filter, Metrics: metrics, FilterType: filterType, Formatter: formatter}
-		var output Output = StandardOutput{}
-		if _output != "" {
-			output = NewCSVOutput(_output)
-		}
 		QueryCostWithQuery(query, output)
 	}
-
 }
 
 func QueryCostWithQuery(query Query, out Output) {
