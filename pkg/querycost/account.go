@@ -16,8 +16,10 @@ func FetchAccountsMap(profileName string) (map[string]string, error) {
 	result, err := svc.ListAccounts(context.Background(), input)
 
 	accountsMap := make(map[string]string)
-	for _, account := range result.Accounts {
-		accountsMap[*account.Id] = *account.Name
+	if err == nil {
+		for _, account := range result.Accounts {
+			accountsMap[*account.Id] = *account.Name
+		}
 	}
 	return accountsMap, err
 }

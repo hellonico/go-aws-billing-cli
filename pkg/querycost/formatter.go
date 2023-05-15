@@ -54,7 +54,15 @@ func (s ReplaceAccountAliasFormatter) Format(res Result) FormattedResult {
 			startDate := *results.TimePeriod.Start
 			endDate := *results.TimePeriod.End
 			for _, groups := range results.Groups {
-				var info = []string{startDate, endDate, accounts[groups.Keys[0]]}
+				var info = []string{startDate, endDate}
+
+				aa, ok := accounts[groups.Keys[0]]
+				if !ok {
+					info = append(info, groups.Keys[0])
+				} else {
+					info = append(info, aa)
+				}
+
 				for _, metrics := range groups.Metrics {
 					info = append(info, *metrics.Amount)
 				}
