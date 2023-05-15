@@ -28,6 +28,9 @@ func main() {
 	var dimension = flag.String("g", "LINKED_ACCOUNT", "group by dimension, one of:\nAZ\nINSTANCE_TYPE\nLEGAL_ENTITY_NAME\nINVOICING_ENTITY\nLINKED_ACCOUNT\nOPERATION\nPLATFORM\nPURCHASE_TYPE\nSERVICE\nTENANCY\nRECORD_TYPE\nUSAGE_TYPE\n")
 	var _filter = flag.String("f", "", "Filter by services. Use , to separate; one or more of (non-exhaustive):\nAWS CloudTrail\nAWS Config\nAWS Cost Explorer\nAWS Directory Service\nAWS Glue\nAWS Key Management Service\nAWS Lambda\nAWS Step Functions\nAWS Support (Developer)\nAmazon Chime\nAmazon Chime Dialin\nAmazon EC2 Container Registry (ECR)\nEC2 - Other\nAmazon Elastic Compute Cloud - Compute\nAmazon Elastic Load Balancing\nAmazon GuardDuty\nAmazon MQ\nAmazon Registrar\nAmazon Relational Database Service\nAmazon Route 53\nAmazon Simple Notification Service\nAmazon Simple Queue Service\nAmazon Simple Storage Service\nAmazon Virtual Private Cloud\nAmazonCloudWatch")
 	var _metrics = flag.String("m", "UnblendedCost", "Metrics. One or more of:\nAmortizedCost\nBlendedCost\nNetAmortizedCost\nNetUnblendedCost\nNormalizedUsageAmount\nUnblendedCost\nUsageQuantity\n")
+	var _formatter = flag.String("fm", "", "Formatting")
+
+	//var la = flag.Bool("la", false, "listaccounts")
 
 	var help = flag.Bool("help", false, "print usage")
 	flag.Parse()
@@ -36,6 +39,6 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	querycost.QueryCost(*profile, *start, *end, *granularity, *dimension, *_filter, *_metrics, *output, *filterType)
+	querycost.NewQuery(*profile, *start, *end, *granularity, *dimension, *_filter, *_metrics, *output, *filterType, *_formatter)
 
 }

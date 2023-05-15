@@ -4,30 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"os"
 )
 
-type Query struct {
-	Profile     string
-	StartDate   string
-	EndDate     string
-	Granularity types.Granularity
-	Dimension   string
-	Filter      []string
-	Metrics     []string
-	Output      Output
-	FilterType  string
-}
-
-type Result struct {
-	Output *costexplorer.GetCostAndUsageOutput
-	Query  Query
-}
-
-func QueryCost(_profile string, _start string, _end string, _granularity string, _groupby string, _filter string, _metrics string, _output string, _filterType string) {
+func NewQuery(_profile string, _start string, _end string, _granularity string, _groupby string, _filter string, _metrics string, _output string, _filterType string, _formatter string) {
 
 	profiles := arrayFromParameter(_profile)
 	filter := arrayFromParameter(_filter)
@@ -42,9 +24,15 @@ func QueryCost(_profile string, _start string, _end string, _granularity string,
 		}
 		profiles = []string{envProfile}
 	}
+	var formatter Formatter
+	if _formatter == "alias" {
+		formatter = ReplaceAccountAliasFormatter{}
+	} else {
+		formatter = SimpleFormatter{}
+	}
 
 	for _, __profile := range profiles {
-		query := Query{Profile: __profile, StartDate: startDate, EndDate: endDate, Granularity: types.Granularity(_granularity), Dimension: _groupby, Filter: filter, Metrics: metrics, FilterType: filterType}
+		query := Query{Profile: __profile, StartDate: startDate, EndDate: endDate, Granularity: types.Granularity(_granularity), Dimension: _groupby, Filter: filter, Metrics: metrics, FilterType: filterType, Formatter: formatter}
 		var output Output = StandardOutput{}
 		if _output != "" {
 			output = NewCSVOutput(_output)
@@ -55,21 +43,16 @@ func QueryCost(_profile string, _start string, _end string, _granularity string,
 }
 
 func QueryCostWithQuery(query Query, out Output) {
-	var profile = query.Profile
-
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profile))
-
-	if err != nil {
-		panic("Cannot load aws profile.")
-	}
-
-	input := prepareAWSInput(query)
-	output := executeQueryWithAWSInput(cfg, input)
-	resultsCosts := Result{output, query}
-	out.DisplayResult(SimpleFormatter{}.Format(resultsCosts))
+	awsInput := prepareAWSInput(query)
+	awsOutput := executeQueryWithAWSInput(query, awsInput)
+	resultsCosts := Result{awsOutput, query}
+	formatted := query.Formatter.Format(resultsCosts)
+	out.DisplayResult(formatted)
 }
 
-func executeQueryWithAWSInput(cfg aws.Config, input *costexplorer.GetCostAndUsageInput) *costexplorer.GetCostAndUsageOutput {
+func executeQueryWithAWSInput(query Query, input *costexplorer.GetCostAndUsageInput) *costexplorer.GetCostAndUsageOutput {
+	cfg, err := GetConfigForProfile(query.Profile)
+
 	svc := costexplorer.NewFromConfig(cfg)
 
 	output, err := svc.GetCostAndUsage(context.Background(), input)
@@ -90,14 +73,27 @@ func executeQueryWithAWSInput(cfg aws.Config, input *costexplorer.GetCostAndUsag
 }
 
 func prepareAWSInput(query Query) *costexplorer.GetCostAndUsageInput {
+	input := &costexplorer.GetCostAndUsageInput{
+		Filter:      getFilterFromQuery(query),
+		Granularity: query.Granularity,
+		TimePeriod: &types.DateInterval{
+			Start: aws.String(query.StartDate),
+			End:   aws.String(query.EndDate),
+		},
+		Metrics: query.Metrics,
+		GroupBy: []types.GroupDefinition{
+			{
+				Type: types.GroupDefinitionTypeDimension,
+				Key:  aws.String(query.Dimension),
+			},
+		},
+	}
+	return input
+}
 
-	start := query.StartDate
-	end := query.EndDate
-	granularity := query.Granularity
+func getFilterFromQuery(query Query) *types.Expression {
 	filter := query.Filter
 	filterType := query.FilterType
-	metrics := query.Metrics
-	groupby := query.Dimension
 
 	var _filter *types.Expression
 	if len(filter) != 0 {
@@ -111,21 +107,5 @@ func prepareAWSInput(query Query) *costexplorer.GetCostAndUsageInput {
 			},
 		}
 	}
-
-	input := &costexplorer.GetCostAndUsageInput{
-		Filter:      _filter,
-		Granularity: granularity,
-		TimePeriod: &types.DateInterval{
-			Start: aws.String(start),
-			End:   aws.String(end),
-		},
-		Metrics: metrics,
-		GroupBy: []types.GroupDefinition{
-			{
-				Type: types.GroupDefinitionTypeDimension,
-				Key:  aws.String(groupby),
-			},
-		},
-	}
-	return input
+	return _filter
 }
