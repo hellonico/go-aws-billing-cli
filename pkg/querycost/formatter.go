@@ -85,8 +85,8 @@ func (s CustomFormatter) Format(res Result) FormattedResult {
 	if res.Query.Dimension == "LINKED_ACCOUNT" {
 		var resultsCosts [][]string
 
-		var headers = []string{"連結アカウント,連結アカウント名,連結アカウント の合計", res.Query.StartDate}
-		resultsCosts = append(resultsCosts, headers)
+		//var headers = []string{"連結アカウント,連結アカウント名,連結アカウント の合計", res.Query.StartDate}
+		//resultsCosts = append(resultsCosts, headers)
 
 		accounts, _ := FetchAccountsMap(res.Query.Profile)
 
